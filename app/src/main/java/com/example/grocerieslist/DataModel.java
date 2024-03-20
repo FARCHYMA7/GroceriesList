@@ -5,6 +5,7 @@ public class DataModel {
     private String item;
     private int amount;
 
+
     public DataModel(String item) {
         this.item = item;
         this.amount = 1;

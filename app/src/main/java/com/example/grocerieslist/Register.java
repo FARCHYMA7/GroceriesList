@@ -18,38 +18,37 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Objects;
 
 public class Register extends AppCompatActivity {
 
-    TextInputEditText editTextEmail, editTextPassword;
+    TextInputEditText editTextUserName, editTextPassword, editTextPhone;
     Button buttonRegister;
-    FirebaseAuth mAuth;
+    FirebaseDatabase database;
+    DatabaseReference reference;
     ProgressBar progressBar;
-
     TextView textView;
+    boolean isUserExist;
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null){
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-            finish();
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        editTextEmail = findViewById(R.id.email);
-        editTextPassword = findViewById(R.id.password);
+        editTextUserName = findViewById(R.id.regUsername);
+        editTextPassword = findViewById(R.id.regPassword);
+        editTextPhone = findViewById(R.id.regPhone);
         buttonRegister = findViewById(R.id.btn_register);
         progressBar = findViewById(R.id.progressBar);
-        textView = findViewById(R.id.loginAfterReg);
-        mAuth = FirebaseAuth.getInstance();
+        textView = findViewById(R.id.loginInReg);
 
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,13 +62,17 @@ public class Register extends AppCompatActivity {
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressBar.setVisibility(View.VISIBLE);
-                String email, password;
-                email = String.valueOf(editTextEmail.getText());
-                password = String.valueOf(editTextPassword.getText());
+                database = FirebaseDatabase.getInstance();
+                reference = database.getReference("users");
 
-                if(TextUtils.isEmpty(email)){
-                    Toast.makeText(Register.this, "Enter email", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.VISIBLE);
+                String userName, password, phone;
+                userName = String.valueOf(editTextUserName.getText());
+                password = String.valueOf(editTextPassword.getText());
+                phone = String.valueOf(editTextPhone.getText());
+
+                if(TextUtils.isEmpty(userName)){
+                    Toast.makeText(Register.this, "Enter user name", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -78,25 +81,47 @@ public class Register extends AppCompatActivity {
                     return;
                 }
 
-                mAuth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                progressBar.setVisibility(View.GONE);
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(Register.this, "Account created",
-                                            Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                    startActivity(intent);
-                                    finish();
+                if(TextUtils.isEmpty(phone)){
+                    Toast.makeText(Register.this, "Enter phone", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                                } else {
-                                    // If sign in fails, display a message to the user.
-                                    Toast.makeText(Register.this, "Authentication failed",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
+                checkUser();
+                if(!isUserExist){
+                    UsersClass newUser = new UsersClass(userName, password, phone);
+                    reference.child(userName).setValue(newUser);
+                    Toast.makeText(Register.this, "Account created",
+                            Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        });
+    }
+
+    public void checkUser(){
+        String userUserName = String.valueOf(editTextUserName.getText());
+        String userPassword = String.valueOf(editTextPassword.getText());
+
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("users");
+        Query checkUserDatabase = reference.orderByChild("username").equalTo(userUserName);
+
+        checkUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (!snapshot.exists()) {
+                    Toast.makeText(Register.this, "User already exist",
+                            Toast.LENGTH_SHORT).show();
+                    isUserExist = true;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }

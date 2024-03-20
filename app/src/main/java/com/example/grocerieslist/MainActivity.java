@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     private CustomeAdapter adapter;
     private EditText input;
 
-    FirebaseAuth auth;
     Button btn_logout;
     Button btn_addItem;
     TextView userName;
@@ -42,9 +41,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        auth = FirebaseAuth.getInstance();
-        userCard = auth.getCurrentUser();
+        userCard.getDisplayName();
         if (userCard == null){
             Intent intent = new Intent(getApplicationContext(), Login.class);
             startActivity(intent);
