@@ -68,13 +68,19 @@ public class Register extends AppCompatActivity {
                 email = String.valueOf(editTextEmail.getText());
                 password = String.valueOf(editTextPassword.getText());
 
-                if(TextUtils.isEmpty(email)){
-                    Toast.makeText(Register.this, "Enter email", Toast.LENGTH_SHORT).show();
+                if (TextUtils.isEmpty(email)) {
+                    editTextEmail.setError("Enter email");
+                    editTextEmail.requestFocus();
+//                    Toast.makeText(Login.this, "Enter email", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
                     return;
                 }
 
-                if(TextUtils.isEmpty(password)){
-                    Toast.makeText(Register.this, "Enter password", Toast.LENGTH_SHORT).show();
+                if (TextUtils.isEmpty(password)) {
+                    editTextPassword.setError("Enter password");
+                    editTextPassword.requestFocus();
+//                    Toast.makeText(Login.this, "Enter password", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
                     return;
                 }
 

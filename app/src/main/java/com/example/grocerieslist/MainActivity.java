@@ -5,8 +5,11 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.view.View;
@@ -30,11 +33,10 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<DataModel> dataSet;
     private CustomeAdapter adapter;
     private EditText input;
-
+    private Button btn_logout;
+    private Button btn_addItem;
+    private TextView userName;
     FirebaseAuth auth;
-    Button btn_logout;
-    Button btn_addItem;
-    TextView userName;
     FirebaseUser userCard;
 
 
@@ -51,16 +53,22 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
         else {
-            dataSet = new ArrayList<>();
             btn_addItem = findViewById(R.id.btn_add);
             btn_logout = findViewById(R.id.btn_logout);
             userName = findViewById(R.id.textView_user);
-            userName.setText(userCard.getEmail());
             recyclerView = findViewById(R.id.res);
             input = findViewById(R.id.et_input);
+            dataSet = new ArrayList<>();
+
+            String dbName = String.valueOf(userCard.getEmail());
+            String userNameToDisplay = dbName.split("@")[0];
+            userName.setText("Hello " + userNameToDisplay);
+
+
             layoutManager = new LinearLayoutManager(this);
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.setItemAnimator(new DefaultItemAnimator());
+
 
             adapter = new CustomeAdapter(dataSet);
             recyclerView.setAdapter(adapter);
@@ -68,15 +76,21 @@ public class MainActivity extends AppCompatActivity {
             btn_addItem.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String a = String.valueOf(input.getText());
-                    Toast.makeText(MainActivity.this, a, Toast.LENGTH_SHORT).show();
-                    if (a.compareTo("") != 0)
+                    String nameItem = String.valueOf(input.getText());
+                    if (nameItem.compareTo("") != 0)
                     {
-                        dataSet.add(new DataModel(a));
-                        input.getText().clear();
-                        adapter.notifyItemInserted(dataSet.size()-1);
-                    }
+                        if (!isExist(dataSet, nameItem))
+                        {
+                            dataSet.add(new DataModel(nameItem));
+                            input.getText().clear();
+                            adapter.notifyItemInserted(dataSet.size()-1);
+                        }
 
+                        else {
+                            Toast.makeText(MainActivity.this, "Item already exist",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
                 }
             });
 
@@ -89,12 +103,16 @@ public class MainActivity extends AppCompatActivity {
                     finish();
                 }
             });
+        }
+    }
 
-
-
-
-
+    public boolean isExist(ArrayList<DataModel> dataSet, String nameCheck) {
+        for (DataModel i : dataSet)
+        {
+            if (i.getNameItem().compareTo(nameCheck) == 0)
+                return true;
         }
 
+        return false;
     }
 }
