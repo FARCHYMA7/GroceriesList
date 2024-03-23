@@ -96,7 +96,7 @@ public class Login extends AppCompatActivity {
         String userPassword = String.valueOf(editTextPassword.getText());
 
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("users");
-        Query checkUserDatabase = reference.orderByChild("username").equalTo(userUserName);
+        Query checkUserDatabase = reference.orderByChild("userName").equalTo(userUserName);
 
         checkUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -106,17 +106,20 @@ public class Login extends AppCompatActivity {
                     editTextUserName.setError(null);
                     String passwordFromDB = snapshot.child(userUserName).child("password").getValue(String.class);
 
-                    if (!Objects.equals(passwordFromDB, userPassword)){
+                    if (passwordFromDB.equals(userPassword)){
                         editTextUserName.setError(null);
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        intent.putExtra("username", userUserName);
                         startActivity(intent);
                         finish();
-                    }else {
+                    }
+                    else {
                         Toast.makeText(Login.this, "Invalid Credentials",
                                 Toast.LENGTH_SHORT).show();
                         editTextPassword.requestFocus();
                     }
-                }else{
+                }
+                else {
                     Toast.makeText(Login.this, "User does not exist",
                             Toast.LENGTH_SHORT).show();
                     editTextUserName.requestFocus();

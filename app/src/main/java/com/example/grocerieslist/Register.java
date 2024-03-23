@@ -35,7 +35,7 @@ public class Register extends AppCompatActivity {
     DatabaseReference reference;
     ProgressBar progressBar;
     TextView textView;
-    boolean isUserExist;
+    boolean isUserExist = false;
 
 
     @Override
@@ -86,14 +86,15 @@ public class Register extends AppCompatActivity {
                     return;
                 }
 
-                checkUser();
-                if(!isUserExist){
+                //checkUser();
+                if(isUserExist == false){
                     UsersClass newUser = new UsersClass(userName, password, phone);
                     reference.child(userName).setValue(newUser);
                     Toast.makeText(Register.this, "Account created",
                             Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.GONE);
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    intent.putExtra("username", userName);
                     startActivity(intent);
                     finish();
                 }
@@ -112,7 +113,7 @@ public class Register extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if (!snapshot.exists()) {
+                if (snapshot.exists()) {
                     Toast.makeText(Register.this, "User already exist",
                             Toast.LENGTH_SHORT).show();
                     isUserExist = true;
